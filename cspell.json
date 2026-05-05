@@ -1,0 +1,39 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "nextjs",
+    "vercel",
+    "tailwindcss",
+    "shadcn",
+    "lucide",
+    "clsx",
+    "tailwind-merge",
+    "postcss"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    ".next",
+    "out",
+    "public",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "*.ico",
+    "*.png",
+    "*.svg"
+  ],
+  "dictionaries": [
+    "typescript",
+    "node",
+    "npm",
+    "html",
+    "css",
+    "bash",
+    "misc"
+  ],
+  "ignoreWords": [
+    "logomark",
+    "devflow"
+  ]
+}

@@ -1,0 +1,36 @@
+#!/bin/sh
+
+echo "🚀 Pre-commit hook started"
+
+echo "🔍 Starting lint check..."
+if pnpm lint; then
+  echo "✅ Lint check passed"
+else
+  echo "❌ Lint check failed. Fix the errors before committing."
+  exit 1
+fi
+echo "🔍 Finished lint check"
+
+echo "📝 Starting spell check..."
+if pnpm spell-check; then
+  echo "✅ Spell check passed"
+else
+  echo "❌ Spell check failed. Fix the typos before committing."
+  exit 1
+fi
+echo "📝 Finished spell check"
+
+echo "🏗️ Starting build..."
+if pnpm build; then
+  echo "✅ Build succeeded"
+else
+  echo "❌ Build failed. Fix the errors before committing."
+  exit 1
+fi
+echo "🏗️ Finished build"
+
+echo "⚙️ Loading environment..."
+./.husky/example-env.sh
+echo "⚙️ Environment loaded"
+
+echo "🎉 Pre-commit hook completed successfully"
