@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- None
+- Connect input panel to generate API (06-connect-generation)
 
 ## Completed
 
@@ -17,6 +17,7 @@ change.
 - **02-app-shell**: Created `components/layout/navbar.tsx` (fixed top, app name + theme toggle), `components/layout/sidebar.tsx` (fixed left 260px, History + Templates placeholders, scrollable), `components/layout/theme-toggle.tsx` (client component toggling `.dark` class), updated `app/page.tsx` with full workspace layout (sidebar + split input/output panels).
 - **03-input-panel**: Created `components/editor/input-panel.tsx` — numbered step badge, subtitle, description textarea with char count (n/2000), Task Type select with emoji icons, Additional Instructions textarea with optional label + help icon, full-width Generate Ticket button disabled when description is empty. Added shadcn Select component.
 - **04-output-panel**: Created `components/editor/output-panel.tsx` — mock data for title, description, and acceptance criteria; editable title (Input) and description (Textarea); per-section copy buttons with check/copy icon feedback; "Copy All as Markdown" button in header; acceptance criteria rendered as a numbered list. Wired into `app/page.tsx` replacing the placeholder.
+- **05-generate-api**: Created `app/api/generate/route.ts` (POST) — validates and sanitizes request, constructs system + user prompt via `lib/prompts.ts`, calls Gemini 2.0 Flash via `@google/generative-ai`, parses and validates JSON response, returns `{ title, description, acceptanceCriteria }`. Added `types/generate.ts` for shared request/response types. API key read from `GEMINI_API_KEY` env var (never exposed to client). Added `.env.example`. Build passes cleanly.
 
 ## In Progress
 
@@ -24,7 +25,7 @@ change.
 
 ## Next Up
 
-- 05 (TBD)
+- 06-connect-generation
 
 ## Open Questions
 

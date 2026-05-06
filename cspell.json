@@ -9,7 +9,10 @@
     "lucide",
     "clsx",
     "tailwind-merge",
-    "postcss"
+    "postcss",
+    "gemini",
+    "genai",
+    "generativeai"
   ],
   "ignorePaths": [
     "node_modules",
