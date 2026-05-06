@@ -5,15 +5,15 @@ change.
 
 ## Current Phase
 
-- [e.g. Not started / In progress / Complete]
+- In Progress
 
 ## Current Goal
 
-- [What you are building right now]
+- 02-layout and workspace scaffold
 
 ## Completed
 
-- None yet.
+- **01-design-system**: Installed and configured shadcn/ui (Tailwind v4), added Button, Card, Input, Textarea, Tabs, ScrollArea, Dialog components, installed lucide-react, created lib/utils.ts with cn() helper, configured CSS variables for light/dark themes aligned to project palette from ui-context.md.
 
 ## In Progress
 
@@ -21,17 +21,19 @@ change.
 
 ## Next Up
 
-- [First unit to build]
+- 02-layout and workspace scaffold (navbar, sidebar, main panels)
 
 ## Open Questions
 
-- [Any unresolved product or technical decisions]
+- None currently.
 
 ## Architecture Decisions
 
-- [Decisions made that affect the system design or
-  data model — include why the decision was made]
+- shadcn/ui initialized with Tailwind v4 support (`shadcn@latest` CLI, `components.json` with `tailwind.version: "4"`)
+- CSS design tokens: project-specific variables (`--bg-base`, `--bg-surface`, `--accent-primary`, etc.) are the source of truth; shadcn tokens (`--background`, `--primary`, etc.) are wired to them via `var()` references so both conventions work seamlessly
 
 ## Session Notes
 
-- [Context needed to resume work in the next session]
+- Build passes cleanly after 01-design-system implementation
+- All 7 shadcn components in `components/ui/`, `lib/utils.ts` with `cn()` in place
+- Light/dark theme via `.dark` class (no hardcoded colors anywhere)
