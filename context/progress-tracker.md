@@ -9,13 +9,14 @@ change.
 
 ## Current Goal
 
-- 04-output-panel
+- None
 
 ## Completed
 
 - **01-design-system**: Installed and configured shadcn/ui (Tailwind v4), added Button, Card, Input, Textarea, Tabs, ScrollArea, Dialog components, installed lucide-react, created lib/utils.ts with cn() helper, configured CSS variables for light/dark themes aligned to project palette from ui-context.md.
 - **02-app-shell**: Created `components/layout/navbar.tsx` (fixed top, app name + theme toggle), `components/layout/sidebar.tsx` (fixed left 260px, History + Templates placeholders, scrollable), `components/layout/theme-toggle.tsx` (client component toggling `.dark` class), updated `app/page.tsx` with full workspace layout (sidebar + split input/output panels).
 - **03-input-panel**: Created `components/editor/input-panel.tsx` — numbered step badge, subtitle, description textarea with char count (n/2000), Task Type select with emoji icons, Additional Instructions textarea with optional label + help icon, full-width Generate Ticket button disabled when description is empty. Added shadcn Select component.
+- **04-output-panel**: Created `components/editor/output-panel.tsx` — mock data for title, description, and acceptance criteria; editable title (Input) and description (Textarea); per-section copy buttons with check/copy icon feedback; "Copy All as Markdown" button in header; acceptance criteria rendered as a numbered list. Wired into `app/page.tsx` replacing the placeholder.
 
 ## In Progress
 
@@ -23,7 +24,7 @@ change.
 
 ## Next Up
 
-- 04-output-panel
+- 05 (TBD)
 
 ## Open Questions
 

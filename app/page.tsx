@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
 import { InputPanel } from "@/components/editor/input-panel";
+import { OutputPanel } from "@/components/editor/output-panel";
 
 export default function Home() {
   return (
@@ -11,8 +12,8 @@ export default function Home() {
         <div className="flex-1 rounded-xl bg-card border border-border p-4 overflow-y-auto">
           <InputPanel />
         </div>
-        <div className="flex-1 rounded-xl bg-card border border-border p-4 flex items-center justify-center">
-          <span className="text-sm text-muted-foreground">Output Panel</span>
+        <div className="flex-1 rounded-xl bg-card border border-border p-4 overflow-y-auto">
+          <OutputPanel />
         </div>
       </main>
     </div>
