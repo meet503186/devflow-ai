@@ -21,7 +21,8 @@
     "pnpm-lock.yaml",
     "*.ico",
     "*.png",
-    "*.svg"
+    "*.svg",
+    "*.tsbuildinfo"
   ],
   "dictionaries": [
     "typescript",

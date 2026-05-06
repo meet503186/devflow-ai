@@ -14,14 +14,15 @@ change.
 ## Completed
 
 - **01-design-system**: Installed and configured shadcn/ui (Tailwind v4), added Button, Card, Input, Textarea, Tabs, ScrollArea, Dialog components, installed lucide-react, created lib/utils.ts with cn() helper, configured CSS variables for light/dark themes aligned to project palette from ui-context.md.
+- **02-app-shell**: Created `components/layout/navbar.tsx` (fixed top, app name + theme toggle), `components/layout/sidebar.tsx` (fixed left 260px, History + Templates placeholders, scrollable), `components/layout/theme-toggle.tsx` (client component toggling `.dark` class), updated `app/page.tsx` with full workspace layout (sidebar + split input/output panels).
 
 ## In Progress
 
-- None yet.
+- None.
 
 ## Next Up
 
-- 02-layout and workspace scaffold (navbar, sidebar, main panels)
+- 03-input-panel
 
 ## Open Questions
 
