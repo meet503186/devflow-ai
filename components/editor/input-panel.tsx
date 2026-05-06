@@ -10,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, HelpCircle } from "lucide-react";
+import { Sparkles, HelpCircle, Loader2 } from "lucide-react";
+import { useGenerateStore } from "@/store/generate";
 
 type TaskType = "bug" | "feature" | "task";
 
@@ -27,8 +28,14 @@ export function InputPanel() {
   const [taskType, setTaskType] = useState<TaskType | "">("");
   const [additionalInstructions, setAdditionalInstructions] = useState("");
 
-  const isDisabled = description.trim().length === 0;
+  const { generate, status } = useGenerateStore();
+  const isLoading = status === "loading";
+  const isDisabled = description.trim().length === 0 || isLoading;
   const charCount = description.length;
+
+  const handleGenerate = () => {
+    generate(description, taskType, additionalInstructions);
+  };
 
   const selectedOption = TASK_TYPE_OPTIONS.find((o) => o.value === taskType);
 
@@ -126,10 +133,15 @@ export function InputPanel() {
       <div className="mt-auto pt-1">
         <Button
           disabled={isDisabled}
+          onClick={handleGenerate}
           className="h-12 w-full gap-2 rounded-md bg-[var(--accent-primary)] text-base font-semibold text-white hover:bg-[var(--accent-primary)]/90 disabled:opacity-50"
         >
-          <Sparkles className="h-5 w-5" />
-          Generate Ticket
+          {isLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Sparkles className="h-5 w-5" />
+          )}
+          {isLoading ? "Generating…" : "Generate Ticket"}
         </Button>
       </div>
     </div>

@@ -4,20 +4,8 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Copy, Check } from "lucide-react";
-
-const MOCK_DATA = {
-  title: "Fix login redirect after session expiry",
-  description:
-    "Users are not being redirected to the login page after their session expires. Instead, they see a blank screen or a 401 error without any user-friendly message. This affects all authenticated routes and degrades the user experience significantly.",
-  acceptanceCriteria: [
-    "When a session expires, the user is automatically redirected to /login",
-    "A toast notification informs the user their session has expired",
-    "After re-authenticating, the user is returned to the page they were on",
-    "The fix works consistently across all authenticated routes",
-    "No console errors appear during the redirect flow",
-  ],
-};
+import { Copy, Check, Loader2, AlertCircle } from "lucide-react";
+import { useGenerateStore } from "@/store/generate";
 
 function useCopyToClipboard() {
   const [copied, setCopied] = useState<string | null>(null);
@@ -62,11 +50,21 @@ function SectionHeader({
 }
 
 export function OutputPanel() {
-  const [title, setTitle] = useState(MOCK_DATA.title);
-  const [description, setDescription] = useState(MOCK_DATA.description);
+  const { status, output, error } = useGenerateStore();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const { copied, copy } = useCopyToClipboard();
 
-  const allMarkdown = `# ${title}\n\n## Description\n\n${description}\n\n## Acceptance Criteria\n\n${MOCK_DATA.acceptanceCriteria.map((c) => `- ${c}`).join("\n")}`;
+  const displayTitle = status === "success" && output ? output.title : title;
+  const displayDescription =
+    status === "success" && output ? output.description : description;
+  const criteria =
+    status === "success" && output ? output.acceptanceCriteria : [];
+
+  const allMarkdown =
+    status === "success" && output
+      ? `# ${displayTitle}\n\n## Description\n\n${displayDescription}\n\n## Acceptance Criteria\n\n${criteria.map((c) => `- ${c}`).join("\n")}`
+      : "";
 
   return (
     <div className="flex h-full flex-col gap-6">
@@ -83,8 +81,9 @@ export function OutputPanel() {
         <Button
           variant="outline"
           size="sm"
+          disabled={status !== "success"}
           onClick={() => copy(allMarkdown, "all")}
-          className="flex items-center gap-2 rounded-md border-[var(--border-default)] text-sm"
+          className="flex items-center gap-2 rounded-md border-[var(--border-default)] text-sm disabled:opacity-40"
         >
           {copied === "all" ? (
             <Check className="h-4 w-4 text-[var(--state-success)]" />
@@ -95,57 +94,90 @@ export function OutputPanel() {
         </Button>
       </div>
 
-      {/* Title */}
-      <div className="flex flex-col gap-2">
-        <SectionHeader
-          label="Title"
-          onCopy={() => copy(title, "title")}
-          isCopied={copied === "title"}
-        />
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="rounded-md border-[var(--border-default)] text-sm font-medium text-[var(--text-primary)]"
-        />
-      </div>
+      {/* Loading state */}
+      {status === "loading" && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-[var(--text-muted)]">
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--accent-primary)]" />
+          <p className="text-sm">Generating your ticket…</p>
+        </div>
+      )}
 
-      {/* Description */}
-      <div className="flex flex-col gap-2">
-        <SectionHeader
-          label="Description"
-          onCopy={() => copy(description, "description")}
-          isCopied={copied === "description"}
-        />
-        <Textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="min-h-[120px] resize-none rounded-md border-[var(--border-default)] text-sm leading-relaxed text-[var(--text-primary)]"
-        />
-      </div>
+      {/* Error state */}
+      {status === "error" && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-[var(--state-error)]/30 bg-[var(--state-error)]/10 px-4 py-3 text-sm text-[var(--state-error)]">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        </div>
+      )}
 
-      {/* Acceptance Criteria */}
-      <div className="flex flex-col gap-2">
-        <SectionHeader
-          label="Acceptance Criteria"
-          onCopy={() =>
-            copy(
-              MOCK_DATA.acceptanceCriteria.map((c) => `- ${c}`).join("\n"),
-              "criteria"
-            )
-          }
-          isCopied={copied === "criteria"}
-        />
-        <ul className="flex flex-col gap-2 rounded-md border border-[var(--border-default)] bg-[var(--bg-base)] p-3">
-          {MOCK_DATA.acceptanceCriteria.map((criterion, index) => (
-            <li key={index} className="flex items-start gap-2 text-sm">
-              <span className="mt-0.5 h-4 w-4 shrink-0 rounded-sm bg-[var(--accent-primary)]/15 text-center text-[10px] font-bold leading-4 text-[var(--accent-primary)]">
-                {index + 1}
-              </span>
-              <span className="text-[var(--text-primary)]">{criterion}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Idle empty state */}
+      {status === "idle" && (
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center text-[var(--text-muted)]">
+          <p className="text-sm">
+            Fill in the description and click{" "}
+            <span className="font-semibold text-[var(--text-primary)]">
+              Generate Ticket
+            </span>{" "}
+            to see results here.
+          </p>
+        </div>
+      )}
+
+      {/* Success: output fields */}
+      {status === "success" && output && (
+        <>
+          {/* Title */}
+          <div className="flex flex-col gap-2">
+            <SectionHeader
+              label="Title"
+              onCopy={() => copy(displayTitle, "title")}
+              isCopied={copied === "title"}
+            />
+            <Input
+              value={displayTitle}
+              onChange={(e) => setTitle(e.target.value)}
+              className="rounded-md border-[var(--border-default)] text-sm font-medium text-[var(--text-primary)]"
+            />
+          </div>
+
+          {/* Description */}
+          <div className="flex flex-col gap-2">
+            <SectionHeader
+              label="Description"
+              onCopy={() => copy(displayDescription, "description")}
+              isCopied={copied === "description"}
+            />
+            <Textarea
+              value={displayDescription}
+              onChange={(e) => setDescription(e.target.value)}
+              className="min-h-[120px] resize-none rounded-md border-[var(--border-default)] text-sm leading-relaxed text-[var(--text-primary)]"
+            />
+          </div>
+
+          {/* Acceptance Criteria */}
+          <div className="flex flex-col gap-2">
+            <SectionHeader
+              label="Acceptance Criteria"
+              onCopy={() =>
+                copy(criteria.map((c) => `- ${c}`).join("\n"), "criteria")
+              }
+              isCopied={copied === "criteria"}
+            />
+            <ul className="flex flex-col gap-2 rounded-md border border-[var(--border-default)] bg-[var(--bg-base)] p-3">
+              {criteria.map((criterion, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="mt-0.5 h-4 w-4 shrink-0 rounded-sm bg-[var(--accent-primary)]/15 text-center text-[10px] font-bold leading-4 text-[var(--accent-primary)]">
+                    {index + 1}
+                  </span>
+                  <span className="text-[var(--text-primary)]">{criterion}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
     </div>
   );
 }

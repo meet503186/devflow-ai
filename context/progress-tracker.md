@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- Connect input panel to generate API (06-connect-generation)
+- None — all planned features complete through 06
 
 ## Completed
 
@@ -18,6 +18,7 @@ change.
 - **03-input-panel**: Created `components/editor/input-panel.tsx` — numbered step badge, subtitle, description textarea with char count (n/2000), Task Type select with emoji icons, Additional Instructions textarea with optional label + help icon, full-width Generate Ticket button disabled when description is empty. Added shadcn Select component.
 - **04-output-panel**: Created `components/editor/output-panel.tsx` — mock data for title, description, and acceptance criteria; editable title (Input) and description (Textarea); per-section copy buttons with check/copy icon feedback; "Copy All as Markdown" button in header; acceptance criteria rendered as a numbered list. Wired into `app/page.tsx` replacing the placeholder.
 - **05-generate-api**: Created `app/api/generate/route.ts` (POST) — validates and sanitizes request, constructs system + user prompt via `lib/prompts.ts`, calls Gemini 2.0 Flash via `@google/generative-ai`, parses and validates JSON response, returns `{ title, description, acceptanceCriteria }`. Added `types/generate.ts` for shared request/response types. API key read from `GEMINI_API_KEY` env var (never exposed to client). Added `.env.example`. Build passes cleanly.
+- **06-connect-generation**: Installed zustand. Created `store/generate.ts` (Zustand store) with `status`, `output`, `error`, and `generate()` action that POSTs to `/api/generate`. Updated `InputPanel` to call `generate()` on button click with loading state (spinner + disabled). Rewrote `OutputPanel` to consume the store — shows idle/loading/error/success states; success renders real API output with editable fields and copy buttons. Build passes cleanly.
 
 ## In Progress
 
@@ -25,7 +26,7 @@ change.
 
 ## Next Up
 
-- 06-connect-generation
+- None.
 
 ## Open Questions
 
