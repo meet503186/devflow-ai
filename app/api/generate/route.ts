@@ -9,7 +9,7 @@ import type {
 
 const MAX_INPUT_LENGTH = 2000;
 const MAX_INSTRUCTIONS_LENGTH = 500;
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 function validateRequest(body: unknown): GenerateRequest {
   if (typeof body !== "object" || body === null) {
@@ -84,7 +84,10 @@ export async function POST(
     if (err instanceof ValidationError) {
       return NextResponse.json({ error: err.message }, { status: 400 });
     }
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 },
+    );
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
