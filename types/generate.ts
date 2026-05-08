@@ -25,3 +25,10 @@ export interface GenerateResponse {
 export interface GenerateErrorResponse {
   error: string;
 }
+
+export interface HistoryEntry {
+  id: string;
+  output: Omit<GenerateResponse, "debugInfo">;
+  input: { input: string; taskType: string; instructions: string };
+  timestamp: number;
+}
