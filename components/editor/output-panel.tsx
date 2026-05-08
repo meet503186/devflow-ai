@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, Loader2, AlertCircle } from "lucide-react";
+import { Copy, Check, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { useGenerateStore } from "@/store/generate";
 
 function useCopyToClipboard() {
@@ -50,7 +50,7 @@ function SectionHeader({
 }
 
 export function OutputPanel() {
-  const { status, output, error } = useGenerateStore();
+  const { status, output, error, regenerate } = useGenerateStore();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { copied, copy } = useCopyToClipboard();
@@ -78,20 +78,32 @@ export function OutputPanel() {
             Review and edit the output before copying.
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={status !== "success"}
-          onClick={() => copy(allMarkdown, "all")}
-          className="flex items-center gap-2 rounded-md border-[var(--border-default)] text-sm disabled:opacity-40"
-        >
-          {copied === "all" ? (
-            <Check className="h-4 w-4 text-[var(--state-success)]" />
-          ) : (
-            <Copy className="h-4 w-4" />
-          )}
-          {copied === "all" ? "Copied!" : "Copy All as Markdown"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={status !== "success"}
+            onClick={regenerate}
+            className="flex items-center gap-2 rounded-md border-[var(--border-default)] text-sm disabled:opacity-40"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Regenerate
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={status !== "success"}
+            onClick={() => copy(allMarkdown, "all")}
+            className="flex items-center gap-2 rounded-md border-[var(--border-default)] text-sm disabled:opacity-40"
+          >
+            {copied === "all" ? (
+              <Check className="h-4 w-4 text-[var(--state-success)]" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+            {copied === "all" ? "Copied!" : "Copy All as Markdown"}
+          </Button>
+        </div>
       </div>
 
       {/* Loading state */}

@@ -12,7 +12,8 @@
     "postcss",
     "gemini",
     "genai",
-    "generativeai"
+    "generativeai",
+    "unrs"
   ],
   "ignorePaths": [
     "node_modules",

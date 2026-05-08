@@ -30,7 +30,7 @@ export function buildUserPrompt(req: GenerateRequest): string {
 
   if (req.previousOutput) {
     parts.push(
-      `\nPrevious Output (use as reference — improve on this):\n${req.previousOutput}`,
+      `\nPrevious Output (this was your last attempt — improve it: make the title more specific, the description clearer and more actionable, and the acceptance criteria sharper and more testable):\n${req.previousOutput}`,
     );
   }
 
