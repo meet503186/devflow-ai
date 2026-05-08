@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildSystemPrompt, buildUserPrompt } from "@/lib/prompts";
 import type {
+  DebugInfo,
   GenerateRequest,
   GenerateResponse,
   GenerateErrorResponse,
@@ -96,17 +97,33 @@ export async function POST(
   }
 
   try {
+    const systemPrompt = buildSystemPrompt(req.templateId);
+    const userPrompt = buildUserPrompt(req);
+
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: GEMINI_MODEL,
-      systemInstruction: buildSystemPrompt(req.templateId),
+      systemInstruction: systemPrompt,
     });
 
-    const result = await model.generateContent(buildUserPrompt(req));
+    const startMs = Date.now();
+    const result = await model.generateContent(userPrompt);
+    const latencyMs = Date.now() - startMs;
+
     const text = result.response.text();
     const response = parseResponse(text);
+    const usage = result.response.usageMetadata;
 
-    return NextResponse.json(response);
+    const debugInfo: DebugInfo = {
+      systemPrompt,
+      userPrompt,
+      rawResponse: text,
+      latencyMs,
+      promptTokens: usage?.promptTokenCount ?? 0,
+      responseTokens: usage?.candidatesTokenCount ?? 0,
+    };
+
+    return NextResponse.json({ ...response, debugInfo });
   } catch (err) {
     console.error(
       "[generate] generation error:",

@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- None — all planned features complete through 08
+- None — all planned features complete through 09
 
 ## Completed
 
@@ -21,6 +21,7 @@ change.
 - **06-connect-generation**: Installed zustand. Created `store/generate.ts` (Zustand store) with `status`, `output`, `error`, and `generate()` action that POSTs to `/api/generate`. Updated `InputPanel` to call `generate()` on button click with loading state (spinner + disabled). Rewrote `OutputPanel` to consume the store — shows idle/loading/error/success states; success renders real API output with editable fields and copy buttons. Build passes cleanly.
 - **07-regenerate**: Added `regenerate()` action to Zustand store — saves current output to `history: GenerateResponse[]` before replacing, re-sends the same `lastInput` with `previousOutput` (human-readable formatted string) to `/api/generate`. Store also tracks `lastInput` on every `generate()` call. Strengthened regeneration prompt in `lib/prompts.ts` to explicitly ask for improved title specificity, description clarity, and sharper acceptance criteria. Added "Regenerate" button to `OutputPanel` header (enabled only on success, alongside "Copy All as Markdown"). Build passes cleanly.
 - **08-templates**: Created `lib/templates.ts` with three templates (Bug Report 🐛, Feature Request ✨, API Endpoint 🔌) — each carries a `systemPromptAddition` that appends template-specific structure requirements to the system prompt. Added `templateId` to `GenerateRequest` type. Updated `buildSystemPrompt(templateId?)` in `lib/prompts.ts` to inject the template's addition when provided. API route (`app/api/generate/route.ts`) accepts and validates `templateId`, passes it to `buildSystemPrompt`. Zustand store tracks `activeTemplateId` with `setTemplate()` action; both `generate()` and `regenerate()` forward the active template to the API. Sidebar (`components/layout/sidebar.tsx`) upgraded to a client component — renders clickable template cards with active/inactive highlight; clicking a second time on the active template deselects it. Build passes cleanly.
+- **09-debug-panel**: Added `DebugInfo` type to `types/generate.ts` (`systemPrompt`, `userPrompt`, `rawResponse`, `latencyMs`, `promptTokens`, `responseTokens`). Updated `GenerateResponse` to include optional `debugInfo`. API route now captures system/user prompt strings, times the Gemini call, reads `usageMetadata` from the response, and returns `debugInfo` alongside the ticket fields. Created `components/editor/debug-panel.tsx` — collapsible bottom panel (hidden until first generation), header shows latency + total tokens inline, expands to shadcn Tabs with "Prompt Used" (system + user prompt), "Raw Response", and "Parsed JSON" tabs each in a 192px ScrollArea, plus a stats footer showing per-category token counts. Updated `app/page.tsx` to flex-col layout with `DebugPanel` below the input/output row. Build passes cleanly.
 
 ## In Progress
 

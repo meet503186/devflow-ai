@@ -1,3 +1,12 @@
+export interface DebugInfo {
+  systemPrompt: string;
+  userPrompt: string;
+  rawResponse: string;
+  latencyMs: number;
+  promptTokens: number;
+  responseTokens: number;
+}
+
 export interface GenerateRequest {
   input: string;
   taskType: string;
@@ -10,6 +19,7 @@ export interface GenerateResponse {
   title: string;
   description: string;
   acceptanceCriteria: string[];
+  debugInfo?: DebugInfo;
 }
 
 export interface GenerateErrorResponse {
