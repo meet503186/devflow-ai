@@ -1,7 +1,10 @@
 import type { GenerateRequest } from "@/types/generate";
+import { getTemplate } from "@/lib/templates";
 
-export function buildSystemPrompt(): string {
-  return `You are an expert software project manager and technical writer. Your task is to convert unstructured developer task descriptions into well-structured Jira tickets.
+export function buildSystemPrompt(templateId?: string): string {
+  const template = templateId ? getTemplate(templateId) : undefined;
+
+  const base = `You are an expert software project manager and technical writer. Your task is to convert unstructured developer task descriptions into well-structured Jira tickets.
 
 Always respond with a valid JSON object in this exact format:
 {
@@ -20,6 +23,10 @@ Rules:
 - Description must give a developer enough context to implement the feature without guessing.
 - Acceptance criteria must each be specific, testable, and measurable.
 - Generate between 3 and 6 acceptance criteria items.`;
+
+  if (!template) return base;
+
+  return `${base}\n\n${template.systemPromptAddition}`;
 }
 
 export function buildUserPrompt(req: GenerateRequest): string {

@@ -9,7 +9,7 @@ change.
 
 ## Current Goal
 
-- None — all planned features complete through 06
+- None — all planned features complete through 08
 
 ## Completed
 
@@ -20,6 +20,7 @@ change.
 - **05-generate-api**: Created `app/api/generate/route.ts` (POST) — validates and sanitizes request, constructs system + user prompt via `lib/prompts.ts`, calls Gemini 2.0 Flash via `@google/generative-ai`, parses and validates JSON response, returns `{ title, description, acceptanceCriteria }`. Added `types/generate.ts` for shared request/response types. API key read from `GEMINI_API_KEY` env var (never exposed to client). Added `.env.example`. Build passes cleanly.
 - **06-connect-generation**: Installed zustand. Created `store/generate.ts` (Zustand store) with `status`, `output`, `error`, and `generate()` action that POSTs to `/api/generate`. Updated `InputPanel` to call `generate()` on button click with loading state (spinner + disabled). Rewrote `OutputPanel` to consume the store — shows idle/loading/error/success states; success renders real API output with editable fields and copy buttons. Build passes cleanly.
 - **07-regenerate**: Added `regenerate()` action to Zustand store — saves current output to `history: GenerateResponse[]` before replacing, re-sends the same `lastInput` with `previousOutput` (human-readable formatted string) to `/api/generate`. Store also tracks `lastInput` on every `generate()` call. Strengthened regeneration prompt in `lib/prompts.ts` to explicitly ask for improved title specificity, description clarity, and sharper acceptance criteria. Added "Regenerate" button to `OutputPanel` header (enabled only on success, alongside "Copy All as Markdown"). Build passes cleanly.
+- **08-templates**: Created `lib/templates.ts` with three templates (Bug Report 🐛, Feature Request ✨, API Endpoint 🔌) — each carries a `systemPromptAddition` that appends template-specific structure requirements to the system prompt. Added `templateId` to `GenerateRequest` type. Updated `buildSystemPrompt(templateId?)` in `lib/prompts.ts` to inject the template's addition when provided. API route (`app/api/generate/route.ts`) accepts and validates `templateId`, passes it to `buildSystemPrompt`. Zustand store tracks `activeTemplateId` with `setTemplate()` action; both `generate()` and `regenerate()` forward the active template to the API. Sidebar (`components/layout/sidebar.tsx`) upgraded to a client component — renders clickable template cards with active/inactive highlight; clicking a second time on the active template deselects it. Build passes cleanly.
 
 ## In Progress
 

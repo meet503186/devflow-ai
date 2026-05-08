@@ -16,10 +16,8 @@ function validateRequest(body: unknown): GenerateRequest {
     throw new ValidationError("Invalid request body");
   }
 
-  const { input, taskType, instructions, previousOutput } = body as Record<
-    string,
-    unknown
-  >;
+  const { input, taskType, instructions, previousOutput, templateId } =
+    body as Record<string, unknown>;
 
   if (typeof input !== "string" || input.trim().length === 0) {
     throw new ValidationError("input is required");
@@ -42,6 +40,7 @@ function validateRequest(body: unknown): GenerateRequest {
         : undefined,
     previousOutput:
       typeof previousOutput === "string" ? previousOutput : undefined,
+    templateId: typeof templateId === "string" ? templateId : undefined,
   };
 }
 
@@ -100,7 +99,7 @@ export async function POST(
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: GEMINI_MODEL,
-      systemInstruction: buildSystemPrompt(),
+      systemInstruction: buildSystemPrompt(req.templateId),
     });
 
     const result = await model.generateContent(buildUserPrompt(req));

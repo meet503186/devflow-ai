@@ -3,6 +3,7 @@ export interface GenerateRequest {
   taskType: string;
   instructions?: string;
   previousOutput?: string;
+  templateId?: string;
 }
 
 export interface GenerateResponse {

@@ -15,6 +15,8 @@ interface GenerateState {
   error: string | null;
   history: GenerateResponse[];
   lastInput: LastInput | null;
+  activeTemplateId: string | null;
+  setTemplate: (templateId: string | null) => void;
   generate: (input: string, taskType: string, instructions: string) => Promise<void>;
   regenerate: () => Promise<void>;
 }
@@ -33,13 +35,16 @@ export const useGenerateStore = create<GenerateState>((set, get) => ({
   error: null,
   history: [],
   lastInput: null,
+  activeTemplateId: null,
+  setTemplate: (templateId) => set({ activeTemplateId: templateId }),
   generate: async (input, taskType, instructions) => {
+    const { activeTemplateId } = get();
     set({ status: "loading", error: null, lastInput: { input, taskType, instructions } });
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input, taskType, instructions }),
+        body: JSON.stringify({ input, taskType, instructions, templateId: activeTemplateId ?? undefined }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -52,7 +57,7 @@ export const useGenerateStore = create<GenerateState>((set, get) => ({
     }
   },
   regenerate: async () => {
-    const { output, lastInput } = get();
+    const { output, lastInput, activeTemplateId } = get();
     if (!output || !lastInput) return;
 
     const previousOutput = formatOutputForPrompt(output);
@@ -67,7 +72,7 @@ export const useGenerateStore = create<GenerateState>((set, get) => ({
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...lastInput, previousOutput }),
+        body: JSON.stringify({ ...lastInput, previousOutput, templateId: activeTemplateId ?? undefined }),
       });
       const data = await res.json();
       if (!res.ok) {
