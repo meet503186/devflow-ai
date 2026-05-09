@@ -4,12 +4,12 @@ export interface DebugInfo {
   rawResponse: string;
   latencyMs: number;
   promptTokens: number;
-  responseTokens: number;
+  completionTokens: number;
+  temperature: number;
 }
 
 export interface GenerateRequest {
   input: string;
-  taskType: string;
   instructions?: string;
   previousOutput?: string;
   templateId?: string;
@@ -29,6 +29,6 @@ export interface GenerateErrorResponse {
 export interface HistoryEntry {
   id: string;
   output: Omit<GenerateResponse, "debugInfo">;
-  input: { input: string; taskType: string; instructions: string };
+  input: { description: string; additionalInstructions: string };
   timestamp: number;
 }

@@ -13,7 +13,8 @@
     "gemini",
     "genai",
     "generativeai",
-    "unrs"
+    "unrs",
+    "partialize"
   ],
   "ignorePaths": [
     "node_modules",
@@ -28,17 +29,6 @@
     "*.svg",
     "*.tsbuildinfo"
   ],
-  "dictionaries": [
-    "typescript",
-    "node",
-    "npm",
-    "html",
-    "css",
-    "bash",
-    "misc"
-  ],
-  "ignoreWords": [
-    "logomark",
-    "devflow"
-  ]
+  "dictionaries": ["typescript", "node", "npm", "html", "css", "bash", "misc"],
+  "ignoreWords": ["logomark", "devflow"]
 }

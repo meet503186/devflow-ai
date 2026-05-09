@@ -7,34 +7,34 @@ import type {
   GenerateResponse,
   GenerateErrorResponse,
 } from "@/types/generate";
-
-const MAX_INPUT_LENGTH = 2000;
-const MAX_INSTRUCTIONS_LENGTH = 500;
-const GEMINI_MODEL = "gemini-2.5-flash";
+import {
+  GEMINI_MODEL,
+  MAX_INPUT_LENGTH,
+  MAX_INSTRUCTIONS_LENGTH,
+  TEMPERATURE,
+} from "@/lib/config";
 
 function validateRequest(body: unknown): GenerateRequest {
   if (typeof body !== "object" || body === null) {
     throw new ValidationError("Invalid request body");
   }
 
-  const { input, taskType, instructions, previousOutput, templateId } =
-    body as Record<string, unknown>;
+  const { input, instructions, previousOutput, templateId } = body as Record<
+    string,
+    unknown
+  >;
 
   if (typeof input !== "string" || input.trim().length === 0) {
     throw new ValidationError("input is required");
   }
   if (input.length > MAX_INPUT_LENGTH) {
     throw new ValidationError(
-      `input must be ${MAX_INPUT_LENGTH} characters or fewer`,
+      `input must be ${MAX_INPUT_LENGTH} characters or fewer`
     );
-  }
-  if (typeof taskType !== "string" || taskType.trim().length === 0) {
-    throw new ValidationError("taskType is required");
   }
 
   return {
     input: input.trim(),
-    taskType: taskType.trim(),
     instructions:
       typeof instructions === "string"
         ? instructions.slice(0, MAX_INSTRUCTIONS_LENGTH)
@@ -65,7 +65,7 @@ function parseResponse(text: string): GenerateResponse {
     title: parsed.title,
     description: parsed.description,
     acceptanceCriteria: (parsed.acceptanceCriteria as unknown[]).filter(
-      (c): c is string => typeof c === "string",
+      (c): c is string => typeof c === "string"
     ),
   };
 }
@@ -73,7 +73,7 @@ function parseResponse(text: string): GenerateResponse {
 class ValidationError extends Error {}
 
 export async function POST(
-  request: NextRequest,
+  request: NextRequest
 ): Promise<NextResponse<GenerateResponse | GenerateErrorResponse>> {
   let req: GenerateRequest;
 
@@ -86,7 +86,7 @@ export async function POST(
     }
     return NextResponse.json(
       { error: "Invalid request body" },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -104,6 +104,7 @@ export async function POST(
     const model = genAI.getGenerativeModel({
       model: GEMINI_MODEL,
       systemInstruction: systemPrompt,
+      generationConfig: { temperature: TEMPERATURE },
     });
 
     const startMs = Date.now();
@@ -120,14 +121,15 @@ export async function POST(
       rawResponse: text,
       latencyMs,
       promptTokens: usage?.promptTokenCount ?? 0,
-      responseTokens: usage?.candidatesTokenCount ?? 0,
+      completionTokens: usage?.candidatesTokenCount ?? 0,
+      temperature: TEMPERATURE,
     };
 
     return NextResponse.json({ ...response, debugInfo });
   } catch (err) {
     console.error(
       "[generate] generation error:",
-      err instanceof Error ? err.message : err,
+      err instanceof Error ? err.message : err
     );
     return NextResponse.json({ error: "Generation failed" }, { status: 500 });
   }

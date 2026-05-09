@@ -73,7 +73,7 @@
     --border: var(--border-default);
     --input: var(--border-default);
     --ring: var(--accent-primary);
-    --radius: 0.625rem;
+    --radius: 0.75rem;
     --sidebar: var(--bg-surface);
     --sidebar-foreground: var(--text-primary);
     --sidebar-primary: var(--accent-primary);

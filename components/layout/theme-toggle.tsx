@@ -14,9 +14,9 @@ function subscribe(cb: () => void) {
 }
 
 const getSnapshot = () => document.documentElement.classList.contains("dark");
-const getServerSnapshot = () => false;
+const getServerSnapshot = () => true;
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const isDark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const toggle = useCallback(() => {
@@ -24,7 +24,7 @@ export function ThemeToggle() {
   }, []);
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
+    <Button variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme" className={className}>
       {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>
   );

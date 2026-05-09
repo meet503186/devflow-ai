@@ -32,8 +32,7 @@ Rules:
 export function buildUserPrompt(req: GenerateRequest): string {
   const parts: string[] = [];
 
-  parts.push(`Task Type: ${req.taskType}`);
-  parts.push(`\nTask Description:\n${req.input}`);
+  parts.push(`Task Description:\n${req.input}`);
 
   if (req.previousOutput) {
     parts.push(
