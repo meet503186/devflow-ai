@@ -26,9 +26,28 @@ export interface GenerateErrorResponse {
   error: string;
 }
 
-export interface HistoryEntry {
+export interface TicketVersionOutput {
+  title: string;
+  description: string;
+  acceptanceCriteria: string[];
+}
+
+export interface TicketVersion {
   id: string;
-  output: Omit<GenerateResponse, "debugInfo">;
-  input: { description: string; additionalInstructions: string };
-  timestamp: number;
+  createdAt: string;
+  output: TicketVersionOutput;
+  metadata?: {
+    latency?: number;
+    tokens?: number;
+  };
+}
+
+export interface TicketSession {
+  id: string;
+  createdAt: string;
+  generationType: string;
+  input: string;
+  instructions?: string;
+  activeVersionId: string;
+  versions: TicketVersion[];
 }

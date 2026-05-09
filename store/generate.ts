@@ -1,13 +1,35 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { GenerateResponse, HistoryEntry } from "@/types/generate";
+import type { GenerateResponse, TicketSession, TicketVersion } from "@/types/generate";
 
 type GenerateStatus = "idle" | "loading" | "success" | "error";
 
-type LastInput = {
-  description: string;
-  additionalInstructions: string;
-};
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function makeVersion(response: GenerateResponse): TicketVersion {
+  const { debugInfo, ...output } = response;
+  return {
+    id: generateId(),
+    createdAt: new Date().toISOString(),
+    output,
+    metadata: debugInfo
+      ? {
+          latency: debugInfo.latencyMs,
+          tokens: debugInfo.promptTokens + debugInfo.completionTokens,
+        }
+      : undefined,
+  };
+}
+
+function formatOutputForPrompt(response: GenerateResponse): string {
+  return [
+    `Title: ${response.title}`,
+    `\nDescription:\n${response.description}`,
+    `\nAcceptance Criteria:\n${response.acceptanceCriteria.map((c) => `- ${c}`).join("\n")}`,
+  ].join("\n");
+}
 
 interface GenerateState {
   description: string;
@@ -15,34 +37,19 @@ interface GenerateState {
   status: GenerateStatus;
   output: GenerateResponse | null;
   error: string | null;
-  history: HistoryEntry[];
-  lastInput: LastInput | null;
+  sessions: TicketSession[];
+  activeSessionId: string | null;
+  activeVersionId: string | null;
   activeTemplateId: string | null;
+
   setDescription: (v: string) => void;
   setAdditionalInstructions: (v: string) => void;
   setTemplate: (templateId: string | null) => void;
-  restore: (entry: HistoryEntry) => void;
+  restore: (session: TicketSession) => void;
   newTicket: () => void;
+  navigateVersion: (direction: "prev" | "next") => void;
   generate: () => Promise<void>;
   regenerate: () => Promise<void>;
-}
-
-function formatOutputForPrompt(output: GenerateResponse): string {
-  return [
-    `Title: ${output.title}`,
-    `\nDescription:\n${output.description}`,
-    `\nAcceptance Criteria:\n${output.acceptanceCriteria.map((c) => `- ${c}`).join("\n")}`,
-  ].join("\n");
-}
-
-function makeHistoryEntry(output: GenerateResponse, input: LastInput): HistoryEntry {
-  const { debugInfo: _, ...outputWithoutDebug } = output;
-  return {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    output: outputWithoutDebug,
-    input,
-    timestamp: Date.now(),
-  };
 }
 
 export const useGenerateStore = create<GenerateState>()(
@@ -53,52 +60,67 @@ export const useGenerateStore = create<GenerateState>()(
       status: "idle" as GenerateStatus,
       output: null,
       error: null,
-      history: [],
-      lastInput: null,
+      sessions: [],
+      activeSessionId: null,
+      activeVersionId: null,
       activeTemplateId: null,
 
       setDescription: (v) => set({ description: v }),
       setAdditionalInstructions: (v) => set({ additionalInstructions: v }),
       setTemplate: (templateId) => set({ activeTemplateId: templateId }),
 
-      restore: (entry) =>
+      restore: (session) => {
+        const version = session.versions.find((v) => v.id === session.activeVersionId);
+        if (!version) return;
         set({
           status: "success",
-          output: { ...entry.output },
-          lastInput: entry.input,
+          output: { ...version.output },
           error: null,
-          description: entry.input.description,
-          additionalInstructions: entry.input.additionalInstructions,
-        }),
+          description: session.input,
+          additionalInstructions: session.instructions ?? "",
+          activeTemplateId: session.generationType === "none" ? null : session.generationType,
+          activeSessionId: session.id,
+          activeVersionId: session.activeVersionId,
+        });
+      },
 
       newTicket: () =>
-        set((state) => ({
+        set({
           description: "",
           additionalInstructions: "",
           status: "idle",
           output: null,
           error: null,
-          lastInput: null,
+          activeSessionId: null,
+          activeVersionId: null,
           activeTemplateId: null,
-          history:
-            state.output && state.lastInput
-              ? [makeHistoryEntry(state.output, state.lastInput), ...state.history]
-              : state.history,
-        })),
+        }),
+
+      navigateVersion: (direction) => {
+        const { activeSessionId, activeVersionId, sessions } = get();
+        if (!activeSessionId || !activeVersionId) return;
+
+        const session = sessions.find((s) => s.id === activeSessionId);
+        if (!session) return;
+
+        const idx = session.versions.findIndex((v) => v.id === activeVersionId);
+        const newIdx = direction === "prev" ? idx - 1 : idx + 1;
+        if (newIdx < 0 || newIdx >= session.versions.length) return;
+
+        const newVersion = session.versions[newIdx];
+
+        set({
+          activeVersionId: newVersion.id,
+          output: { ...newVersion.output },
+          sessions: sessions.map((s) =>
+            s.id === activeSessionId ? { ...s, activeVersionId: newVersion.id } : s
+          ),
+        });
+      },
 
       generate: async () => {
         const { description, additionalInstructions, activeTemplateId } = get();
-        const newLastInput: LastInput = { description, additionalInstructions };
-
-        set((state) => ({
-          status: "loading",
-          error: null,
-          lastInput: newLastInput,
-          history:
-            state.output && state.lastInput
-              ? [makeHistoryEntry(state.output, state.lastInput), ...state.history]
-              : state.history,
-        }));
+        set({ status: "loading", error: null });
 
         try {
           const res = await fetch("/api/generate", {
@@ -115,34 +137,47 @@ export const useGenerateStore = create<GenerateState>()(
             set({ status: "error", error: data.error ?? "Generation failed." });
             return;
           }
-          set({ status: "success", output: data });
+
+          const version = makeVersion(data);
+          const session: TicketSession = {
+            id: generateId(),
+            createdAt: new Date().toISOString(),
+            generationType: activeTemplateId ?? "none",
+            input: description,
+            instructions: additionalInstructions || undefined,
+            activeVersionId: version.id,
+            versions: [version],
+          };
+
+          set((state) => ({
+            status: "success",
+            output: data,
+            activeSessionId: session.id,
+            activeVersionId: version.id,
+            sessions: [session, ...state.sessions],
+          }));
         } catch {
           set({ status: "error", error: "Network error. Please try again." });
         }
       },
 
       regenerate: async () => {
-        const { output, lastInput, activeTemplateId } = get();
-        if (!output || !lastInput) return;
+        const { output, activeSessionId, activeTemplateId, sessions } = get();
+        if (!output || !activeSessionId) return;
+
+        const currentSession = sessions.find((s) => s.id === activeSessionId);
+        if (!currentSession || currentSession.versions.length >= 4) return;
 
         const previousOutput = formatOutputForPrompt(output);
-
-        set((state) => ({
-          status: "loading",
-          error: null,
-          history:
-            state.output && state.lastInput
-              ? [makeHistoryEntry(state.output, state.lastInput), ...state.history]
-              : state.history,
-        }));
+        set({ status: "loading", error: null });
 
         try {
           const res = await fetch("/api/generate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              input: lastInput.description,
-              instructions: lastInput.additionalInstructions || undefined,
+              input: currentSession.input,
+              instructions: currentSession.instructions || undefined,
               previousOutput,
               templateId: activeTemplateId ?? undefined,
             }),
@@ -152,15 +187,27 @@ export const useGenerateStore = create<GenerateState>()(
             set({ status: "error", error: data.error ?? "Regeneration failed." });
             return;
           }
-          set({ status: "success", output: data });
+
+          const version = makeVersion(data);
+
+          set((state) => ({
+            status: "success",
+            output: data,
+            activeVersionId: version.id,
+            sessions: state.sessions.map((s) =>
+              s.id === activeSessionId
+                ? { ...s, activeVersionId: version.id, versions: [...s.versions, version] }
+                : s
+            ),
+          }));
         } catch {
           set({ status: "error", error: "Network error. Please try again." });
         }
       },
     }),
     {
-      name: "devflow-history",
-      partialize: (state) => ({ history: state.history }),
+      name: "devflow-sessions",
+      partialize: (state) => ({ sessions: state.sessions }),
     }
   )
 );
