@@ -9,7 +9,12 @@
     "lucide",
     "clsx",
     "tailwind-merge",
-    "postcss"
+    "postcss",
+    "gemini",
+    "genai",
+    "generativeai",
+    "unrs",
+    "partialize"
   ],
   "ignorePaths": [
     "node_modules",
@@ -21,19 +26,9 @@
     "pnpm-lock.yaml",
     "*.ico",
     "*.png",
-    "*.svg"
+    "*.svg",
+    "*.tsbuildinfo"
   ],
-  "dictionaries": [
-    "typescript",
-    "node",
-    "npm",
-    "html",
-    "css",
-    "bash",
-    "misc"
-  ],
-  "ignoreWords": [
-    "logomark",
-    "devflow"
-  ]
+  "dictionaries": ["typescript", "node", "npm", "html", "css", "bash", "misc"],
+  "ignoreWords": ["logomark", "devflow"]
 }
